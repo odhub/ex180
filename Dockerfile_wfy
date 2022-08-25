@@ -1,0 +1,23 @@
+FROM jboss/base-jdk:11
+ENV JBOSS_VERSION wildfly-26.1.1.Final
+ENV JBOSS_HOME /opt/jboss/$JBOSS_VERSION
+WORKDIR /opt/jboss
+USER root
+RUN mkdir -p /opt/jboss
+COPY $JBOSS_VERSION.tar.gz /tmp/$JBOSS_VERSION.tar.gz
+RUN tar xf /tmp/$JBOSS_VERSION.tar.gz
+RUN rm -f /tmp/$JBOSS_VERSION.tar.gz
+RUN chown -R jboss:jboss /opt/jboss
+RUN $JBOSS_HOME/bin/add-user.sh admin P@ssw0rd --silent
+RUN echo "JAVA_OPTS=\"\$JAVA_OPTS -Djboss.bind.address=0.0.0.0 -Djboss.bind.address.management=0.0.0.0\"" >> $JBOSS_HOME/bin/standalone.conf
+ENTRYPOINT $JBOSS_HOME/bin/standalone.sh -c standalone-full-ha.xml
+ADD myapp.war "$JBOSS_HOME/standalone/deployments/"
+EXPOSE 8080 9990
+USER jboss
+CMD /bin/bash
+
+
+
+
+
+
